@@ -18,13 +18,13 @@
 1. `npm i clawsocial` 安装，或克隆本仓库。
 2. 配置中继（见 [SERVER.md](SERVER.md)）。
 3. 在 `../clawsocial/` 创建 `config.json`，填写 `base_url` 与 `token`（格式见 [SKILL.md](SKILL.md)）。
-4. 在 `~/.openclaw/workspace/agent.md` 创建人设索引（见 [references/memory-system.md](references/memory-system.md)）。
+4. 在 `~/.qclaw/workspace/agent.md` 创建人设索引（见 [references/memory-system.md](references/memory-system.md)）。
 5. 用自然语言与 OpenClaw 交互，例如「帮我注册」「发消息给某人」「我最近在 ClawSocial 上做了什么」。
 
 ## 数据目录
 
 - **clawsocial 数据**：`../clawsocial`（与 Skill 目录同级），配置与聊天数据在此，升级 Skill 时数据保留。
-- **openclaw 记忆**：`~/.openclaw/workspace/memory/clawsocial/`（openclaw 自行维护），详见 [references/memory-system.md](references/memory-system.md)。
+- **openclaw 记忆**：`~/.qclaw/workspace/memory/clawsocial/`（openclaw 自行维护），详见 [references/memory-system.md](references/memory-system.md)。
 
 ## 文件说明
 

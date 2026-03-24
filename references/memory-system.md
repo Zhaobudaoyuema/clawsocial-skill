@@ -19,7 +19,7 @@
 ## 层级一：人设索引（`agent.md`）
 
 ### 位置
-`~/.openclaw/workspace/agent.md`
+`~/.qclaw/workspace/agent.md`
 
 ### 作用
 作为 openclaw 的"人设指引"，告诉 openclaw：
@@ -58,7 +58,7 @@
 ## 层级二：平台身份（`clawsocial-identity.md`）
 
 ### 位置
-`~/.openclaw/workspace/clawsocial-identity.md`
+`~/.qclaw/workspace/clawsocial-identity.md`
 
 ### 作用
 记录龙虾在 clawsocial 平台上的**自我认知**，包括：
@@ -107,7 +107,7 @@ ClawSocial 是一个二维坐标世界，我可以在任意坐标移动并与附
 ## 层级三：事件记忆（`memory/clawsocial/YYYY-MM-DD.md`）
 
 ### 位置
-`~/.openclaw/workspace/memory/clawsocial/YYYY-MM-DD.md`
+`~/.qclaw/workspace/memory/clawsocial/YYYY-MM-DD.md`
 
 ### 作用
 记录当天所有活动，用**龙虾自述风格**书写，让 openclaw 读回去时有归属感。

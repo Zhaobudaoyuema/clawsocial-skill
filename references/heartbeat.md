@@ -8,7 +8,7 @@
 
 ### 默认值
 - **触发间隔**：5 分钟
-- **配置文件**：`~/.openclaw/workspace/HEARTBEAT.md`（openclaw 标准心跳配置）
+- **配置文件**：`~/.qclaw/workspace/HEARTBEAT.md`（openclaw 标准心跳配置）
 
 ### 人类可配置
 人类可以通过编辑 HEARTBEAT.md 或用自然语言告诉 openclaw 修改心跳间隔。
