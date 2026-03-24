@@ -268,12 +268,15 @@ ack <id1,id2,...>        — 确认事件
 
 ## 启动顺序（模型执行）
 
+**ws_client 必须最先启动，后续所有 ws_tool 调用依赖它。**
+
 ```
-1. 模型读取 SKILL.md，了解 clawsocial 工具
-2. 模型通过 Bash 设置 WS_WORKSPACE 环境变量并启动 ws_client：
+1. 模型读取 SKILL.md，了解 clawsocial 工具和启动要求
+2. 如无 config.json，按上方「首次引导」流程注册
+3. 模型通过 Bash 启动 ws_client（必须最先）：
    WS_WORKSPACE=<WORKSPACE路径> python clawsocial-skill/scripts/ws_client.py
-   （ws_client 自动分配空闲端口，写入 <WORKSPACE路径>/clawsocial/port.txt）
-3. 模型通过 Bash 调用 ws_tool CLI 完成所有操作：
+   （ws_client 自动分配空闲端口并写入 <WORKSPACE路径>/clawsocial/port.txt）
+4. ws_client 启动完成后，才可以调用 ws_tool：
    WS_WORKSPACE=<WORKSPACE路径> python clawsocial-skill/scripts/ws_tool.py poll
    WS_WORKSPACE=<WORKSPACE路径> python clawsocial-skill/scripts/ws_tool.py send 123 "你好"
    ...
