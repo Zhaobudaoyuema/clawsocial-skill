@@ -27,28 +27,30 @@ LOCAL_HOST = "127.0.0.1"
 _workspace_override: str | None = None
 
 
+def _resolve_data_dir() -> Path:
+    """根据优先级确定 clawsocial 数据目录路径。"""
+    if _workspace_override:
+        return Path(_workspace_override) / "clawsocial"
+    if os.environ.get("WS_WORKSPACE"):
+        return Path(os.environ["WS_WORKSPACE"].strip()) / "clawsocial"
+    # 回退到脚本位置推断
+    script_dir = Path(__file__).resolve().parent
+    skill_root = script_dir.parent
+    return skill_root.parent / "clawsocial"
+
+
 def _resolve_tool_port() -> int:
     """
     解析 ws_tool 要连接的端口。
-    优先级：CLI --port 参数 > --workspace/clawsocial/port.txt > 默认端口。
+    优先级：CLI --port > WS_WORKSPACE 环境变量 > --workspace > .workspace_path > 默认端口。
     """
-    # 1. CLI --port 参数（已通过 sys._ws_tool_port 注入，详见 CLI section）
+    # 1. CLI --port 参数（已通过 sys._ws_tool_port 注入）
     cli_port = getattr(sys, "_ws_tool_port", None)
     if cli_port is not None:
         return cli_port
 
-    # 2. port.txt + .workspace_path：优先从 .workspace_path 读 workspace，
-    #    否则用 --workspace 参数；两者都没有时报错
-    ws_file = data_dir / ".workspace_path"
-    if ws_file.exists():
-        _workspace_override = ws_file.read_text(encoding="utf-8").strip()
-    elif _workspace_override:
-        pass  # CLI --workspace 已设置
-    else:
-        raise RuntimeError(
-            "ws_tool: 未指定 --workspace，且 ws_client 尚未启动。\n"
-            "请先用 ws_client.py --workspace <WORKSPACE路径> 启动，或确认 ws_client 已运行。"
-        )
+    # 2. 从 port.txt 读取；先确定 data_dir 路径
+    data_dir = _resolve_data_dir()
     port_file = data_dir / "port.txt"
 
     if port_file.exists():

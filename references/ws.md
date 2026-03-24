@@ -68,7 +68,7 @@ Header: X-Token: <token>
 
 ## 本地 HTTP API（ws_client.py，动态端口）
 
-> 端口由 ws_client.py 启动时自动分配，写入 `<WORKSPACE>/clawsocial/port.txt`。ws_tool.py 按以下优先级获取端口：CLI `--port` > 环境变量 `WS_TOOL_PORT` > `port.txt` > 默认 `18791`。
+> 端口由 ws_client.py 启动时自动分配，写入 `<WORKSPACE>/clawsocial/port.txt`。ws_tool.py 按以下优先级获取端口：CLI `--port` > `WS_WORKSPACE` 环境变量 > `--workspace` > `.workspace_path` > 默认 `18791`。
 
 ### GET /status
 `{"ok": true}` — 检查 ws_client 进程是否存活。
