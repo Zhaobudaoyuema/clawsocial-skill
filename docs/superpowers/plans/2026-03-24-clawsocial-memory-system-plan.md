@@ -16,7 +16,7 @@
 
 ```
 实施涉及的文件：
-  ~/.qclaw/workspace/
+  ~/.openclaw/workspace/
     agent.md                        ← 【新建】人类使用模板（skill 不含此文件）
     AGENTS.md                       ← 【补充】加入 clawsocial 规则段落
     HEARTBEAT.md                    ← 【补充】加入 clawsocial 心跳任务
@@ -38,10 +38,10 @@
 ## Task 1: 审阅现有 openclaw workspace 文件
 
 **Files:**
-- Check: `~/.qclaw/workspace/SOUL.md`
-- Check: `~/.qclaw/workspace/IDENTITY.md`
-- Check: `~/.qclaw/workspace/AGENTS.md`
-- Check: `~/.qclaw/workspace/HEARTBEAT.md`
+- Check: `~/.openclaw/workspace/SOUL.md`
+- Check: `~/.openclaw/workspace/IDENTITY.md`
+- Check: `~/.openclaw/workspace/AGENTS.md`
+- Check: `~/.openclaw/workspace/HEARTBEAT.md`
 
 - [ ] **Step 1: 读取现有文件，了解当前内容**
 
@@ -50,12 +50,12 @@ Purpose: 确保补充规则与现有内容兼容，不冲突
 
 - [ ] **Step 2: 确认 workspace 根目录**
 
-Run: `ls ~/.qclaw/workspace/`
+Run: `ls ~/.openclaw/workspace/`
 Purpose: 确认 memory/ 目录是否存在，如不存在需要创建
 
 - [ ] **Step 3: 如 memory/clawsocial/ 不存在，创建目录**
 
-Run: `mkdir -p ~/.qclaw/workspace/memory/clawsocial/archive`
+Run: `mkdir -p ~/.openclaw/workspace/memory/clawsocial/archive`
 Purpose: 确保 openclaw 有写记忆的地方
 
 - [ ] **Step 4: Commit workspace 初始化**
@@ -70,7 +70,7 @@ git commit -m "chore: 初始化 clawsocial 记忆目录"
 ## Task 2: 创建 agent.md 人设索引模板
 
 **Files:**
-- Create: `~/.qclaw/workspace/agent.md`
+- Create: `~/.openclaw/workspace/agent.md`
 
 - [ ] **Step 1: 创建 agent.md（人类使用模板）**
 
@@ -147,7 +147,7 @@ git commit -m "chore: 初始化 clawsocial 记忆目录"
 - [ ] **Step 2: Commit**
 
 ```bash
-git add ~/.qclaw/workspace/agent.md
+git add ~/.openclaw/workspace/agent.md
 git commit -m "feat: 创建 agent.md 人设索引模板"
 ```
 
@@ -156,7 +156,7 @@ git commit -m "feat: 创建 agent.md 人设索引模板"
 ## Task 3: 补充 AGENTS.md 规则段落
 
 **Files:**
-- Modify: `~/.qclaw/workspace/AGENTS.md`（追加 clawsocial 规则段落）
+- Modify: `~/.openclaw/workspace/AGENTS.md`（追加 clawsocial 规则段落）
 
 - [ ] **Step 1: 在 AGENTS.md 末尾追加 clawsocial 规则段落**
 
@@ -202,19 +202,19 @@ git commit -m "feat: 创建 agent.md 人设索引模板"
 ### 工具使用
 所有操作通过 Bash 调用 ws_tool.py CLI：
 ```bash
-python clawsocial/scripts/ws_tool.py poll      # 拉取未读事件
-python clawsocial/scripts/ws_tool.py send <id> "<内容>"  # 发消息
-python clawsocial/scripts/ws_tool.py move <x> <y>  # 移动
-python clawsocial/scripts/ws_tool.py world     # 世界快照
-python clawsocial/scripts/ws_tool.py friends   # 好友列表
-python clawsocial/scripts/ws_tool.py ack <id1,id2>  # 确认事件
+python clawsocial-skill/scripts/ws_tool.py poll      # 拉取未读事件
+python clawsocial-skill/scripts/ws_tool.py send <id> "<内容>"  # 发消息
+python clawsocial-skill/scripts/ws_tool.py move <x> <y>  # 移动
+python clawsocial-skill/scripts/ws_tool.py world     # 世界快照
+python clawsocial-skill/scripts/ws_tool.py friends   # 好友列表
+python clawsocial-skill/scripts/ws_tool.py ack <id1,id2>  # 确认事件
 ```
 ```
 
 - [ ] **Step 2: Commit**
 
 ```bash
-git add ~/.qclaw/workspace/AGENTS.md
+git add ~/.openclaw/workspace/AGENTS.md
 git commit -m "feat(AGENTS.md): 补充 ClawSocial 平台规则段落"
 ```
 
@@ -223,7 +223,7 @@ git commit -m "feat(AGENTS.md): 补充 ClawSocial 平台规则段落"
 ## Task 4: 补充 HEARTBEAT.md 心跳任务
 
 **Files:**
-- Modify: `~/.qclaw/workspace/HEARTBEAT.md`（追加 clawsocial 心跳任务）
+- Modify: `~/.openclaw/workspace/HEARTBEAT.md`（追加 clawsocial 心跳任务）
 
 - [ ] **Step 1: 在现有 HEARTBEAT.md 末尾追加 clawsocial 心跳任务**
 
@@ -280,7 +280,7 @@ git commit -m "feat(AGENTS.md): 补充 ClawSocial 平台规则段落"
 - [ ] **Step 2: Commit**
 
 ```bash
-git add ~/.qclaw/workspace/HEARTBEAT.md
+git add ~/.openclaw/workspace/HEARTBEAT.md
 git commit -m "feat(HEARTBEAT.md): 补充 ClawSocial 心跳任务配置"
 ```
 
@@ -292,8 +292,8 @@ git commit -m "feat(HEARTBEAT.md): 补充 ClawSocial 心跳任务配置"
 - Verify: `clawsocial-skill/SKILL.md`
 - Verify: `clawsocial-skill/references/memory-system.md`
 - Verify: `clawsocial-skill/references/heartbeat.md`
-- Verify: `~/.qclaw/workspace/AGENTS.md`
-- Verify: `~/.qclaw/workspace/HEARTBEAT.md`
+- Verify: `~/.openclaw/workspace/AGENTS.md`
+- Verify: `~/.openclaw/workspace/HEARTBEAT.md`
 
 - [ ] **Step 1: SKILL.md 分文档索引检查**
 
@@ -307,9 +307,9 @@ git commit -m "feat(HEARTBEAT.md): 补充 ClawSocial 心跳任务配置"
 
 确认所有文档中引用的路径一致：
 - clawsocial 数据：`../clawsocial/`（与 skill 同级）✅
-- openclaw 记忆：`~/.qclaw/workspace/memory/clawsocial/` ✅
-- 平台身份：`~/.qclaw/workspace/clawsocial-identity.md` ✅
-- 人设索引：`~/.qclaw/workspace/agent.md` ✅
+- openclaw 记忆：`~/.openclaw/workspace/memory/clawsocial/` ✅
+- 平台身份：`~/.openclaw/workspace/clawsocial-identity.md` ✅
+- 人设索引：`~/.openclaw/workspace/agent.md` ✅
 
 - [ ] **Step 3: openclaw 路径说明检查**
 
@@ -376,7 +376,7 @@ cat ../clawsocial/config.json
 - [ ] **Step 3: 写第一天的记忆文件**
 
 ```bash
-touch ~/.qclaw/workspace/memory/clawsocial/2026-03-24.md
+touch ~/.openclaw/workspace/memory/clawsocial/2026-03-24.md
 ```
 
 写入第一天的记忆开头：

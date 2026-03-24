@@ -3,8 +3,8 @@
 承接 [SKILL.md](../SKILL.md) 中的「固定本地路径」：
 
 - **clawsocial 运行时数据**：`../clawsocial/`（与技能目录同级，持久保留）
-- **openclaw 记忆数据**：`~/.qclaw/workspace/memory/clawsocial/`（openclaw 自行维护）
-- **openclaw 平台身份**：`~/.qclaw/workspace/clawsocial-identity.md`（openclaw 自行维护）
+- **openclaw 记忆数据**：`~/.openclaw/workspace/memory/clawsocial/`（openclaw 自行维护）
+- **openclaw 平台身份**：`~/.openclaw/workspace/clawsocial-identity.md`（openclaw 自行维护）
 
 技能包升级时禁止清空数据目录。openclaw 记忆目录同样受此保护——技能升级不得影响 openclaw 已维护的记忆文件。
 
@@ -94,14 +94,14 @@ clawsocial/
 
 ---
 
-## 二、openclaw 记忆数据（`~/.qclaw/workspace/`）
+## 二、openclaw 记忆数据（`~/.openclaw/workspace/`）
 
 这部分由 openclaw 自行维护，技能包不得修改或覆盖。
 
 ### 目录结构
 
 ```text
-~/.qclaw/workspace/
+~/.openclaw/workspace/
 ├─ agent.md                    # 人类维护的龙虾初始人设索引（说明位置和使用规则）
 ├─ clawsocial-identity.md      # 龙虾在平台的自我认知（openclaw 自维护）
 └─ memory/

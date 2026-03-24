@@ -1,21 +1,68 @@
 #!/usr/bin/env python3
 """
-OpenClaw WebSocket 工具集：调用本地 HTTP API（ws_client.py 端口 18791）。
+OpenClaw WebSocket 工具集：调用本地 HTTP API（ws_client.py 端口动态分配）。
 工具：ws_send / ws_move / ws_poll / ws_world_state / ws_ack
-用法：import ws_tool 后直接调用函数（ws_tool 通过 HTTP localhost:18791 与 ws_client 通信）。
+用法：import ws_tool 后直接调用函数（ws_tool 通过 HTTP localhost:动态端口 与 ws_client 通信）。
 依赖：仅 Python 3 标准库（urllib.request），无需 pip install。
+
+端口分配：
+  - ws_client.py 启动时自动选择空闲端口，写入 ../clawsocial/port.txt
+  - ws_tool.py 读取 ../clawsocial/port.txt 获取端口
+  - 可通过环境变量 WS_TOOL_PORT 覆盖
+  - 可通过 CLI --port 参数覆盖
 """
 from __future__ import annotations
 
 import json
+import os
+import socket
+import sys
 import urllib.request
-import urllib.parse
 import urllib.error
+from pathlib import Path
 from typing import Any
 
 LOCAL_HOST = "127.0.0.1"
-LOCAL_PORT = 18791
-LOCAL_BASE = f"http://{LOCAL_HOST}:{LOCAL_PORT}"
+# 由 _main() 在解析 --workspace 后设置，供全模块使用
+_workspace_override: str | None = None
+
+
+def _resolve_tool_port() -> int:
+    """
+    解析 ws_tool 要连接的端口。
+    优先级：CLI --port 参数 > --workspace/clawsocial/port.txt > 默认端口。
+    """
+    # 1. CLI --port 参数（已通过 sys._ws_tool_port 注入，详见 CLI section）
+    cli_port = getattr(sys, "_ws_tool_port", None)
+    if cli_port is not None:
+        return cli_port
+
+    # 2. port.txt + .workspace_path：优先从 .workspace_path 读 workspace，
+    #    否则用 --workspace 参数；两者都没有时报错
+    ws_file = data_dir / ".workspace_path"
+    if ws_file.exists():
+        _workspace_override = ws_file.read_text(encoding="utf-8").strip()
+    elif _workspace_override:
+        pass  # CLI --workspace 已设置
+    else:
+        raise RuntimeError(
+            "ws_tool: 未指定 --workspace，且 ws_client 尚未启动。\n"
+            "请先用 ws_client.py --workspace <WORKSPACE路径> 启动，或确认 ws_client 已运行。"
+        )
+    port_file = data_dir / "port.txt"
+
+    if port_file.exists():
+        try:
+            return int(port_file.read_text(encoding="utf-8").strip())
+        except (ValueError, OSError):
+            pass
+
+    # 3. 回退到默认端口（仅用于单龙虾场景）
+    return 18791
+
+
+def _local_base() -> str:
+    return f"http://{LOCAL_HOST}:{_resolve_tool_port()}"
 
 
 # ── Low-level HTTP helpers ───────────────────────────
@@ -24,7 +71,7 @@ def _post(path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
     """POST JSON 到本地 ws_client HTTP API。"""
     body = json.dumps(data or {}, ensure_ascii=False).encode("utf-8") if data else b""
     req = urllib.request.Request(
-        LOCAL_BASE + path,
+        _local_base() + path,
         data=body,
         headers={"Content-Type": "application/json; charset=utf-8"},
         method="POST",
@@ -40,7 +87,7 @@ def _post(path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
 
 def _get(path: str) -> dict[str, Any] | list | str:
     """GET 本地 ws_client HTTP API。"""
-    req = urllib.request.Request(LOCAL_BASE + path, method="GET")
+    req = urllib.request.Request(_local_base() + path, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read().decode("utf-8")
@@ -195,19 +242,27 @@ def ws_update_status(status: str) -> dict[str, Any]:
 
 # ── CLI entry point (for Bash invocation) ──────────────────────────────
 
-if __name__ == "__main__":
+def _main(argv: list[str] | None = None) -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="ws_tool CLI")
+    parser.add_argument(
+        "--port", type=int, default=None,
+        help="覆盖 ws_tool 连接端口（默认从 <workspace>/clawsocial/port.txt 读取）",
+    )
+    parser.add_argument(
+        "--workspace", type=str, default=None,
+        help="Agent workspace 路径（数据目录为 <workspace>/clawsocial/）",
+    )
     sub = parser.add_subparsers(dest="cmd")
 
     p = sub.add_parser("send")
     p.add_argument("to_id", type=int)
     p.add_argument("content")
 
-    sub.add_parser("move")
-    p.add_argument("x", type=int)
-    p.add_argument("y", type=int)
+    m = sub.add_parser("move")
+    m.add_argument("x", type=int)
+    m.add_argument("y", type=int)
 
     sub.add_parser("poll")
     sub.add_parser("world")
@@ -229,7 +284,14 @@ if __name__ == "__main__":
     a = sub.add_parser("ack")
     a.add_argument("ids", help="逗号分隔的事件ID，如：1,2,3")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
+    # 全局注入，供 _resolve_tool_port() 使用
+    if args.port is not None:
+        sys._ws_tool_port = args.port
+    if args.workspace is not None:
+        global _workspace_override
+        _workspace_override = args.workspace
 
     if args.cmd == "send":
         result = ws_send(args.to_id, args.content)
@@ -258,3 +320,7 @@ if __name__ == "__main__":
         result = {"error": f"未知命令：{args.cmd}"}
 
     print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    _main()

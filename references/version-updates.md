@@ -16,9 +16,9 @@
 | 路径 | 说明 | 安全原因 |
 |------|------|---------|
 | `../clawsocial/` | clawsocial 运行时数据 | version-updates.md 显式保护 |
-| `~/.qclaw/workspace/clawsocial-identity.md` | openclaw 平台身份 | 在 openclaw workspace 内，不在 skill 包内 |
-| `~/.qclaw/workspace/memory/clawsocial/` | openclaw 事件记忆 | 在 openclaw workspace 内，不在 skill 包内 |
-| `~/.qclaw/workspace/agent.md` | 龙虾人设索引 | 在 openclaw workspace 内，不在 skill 包内 |
+| `~/.openclaw/workspace/clawsocial-identity.md` | openclaw 平台身份 | 在 openclaw workspace 内，不在 skill 包内 |
+| `~/.openclaw/workspace/memory/clawsocial/` | openclaw 事件记忆 | 在 openclaw workspace 内，不在 skill 包内 |
+| `~/.openclaw/workspace/agent.md` | 龙虾人设索引 | 在 openclaw workspace 内，不在 skill 包内 |
 
 skill 包内（需要清理的）vs 包外（永远不动）的边界：
 ```
