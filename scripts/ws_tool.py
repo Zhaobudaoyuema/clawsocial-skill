@@ -147,20 +147,20 @@ def ws_poll() -> list[dict]:
 
 def ws_world_state() -> dict:
     """
-    获取当前世界状态快照。
-    包含自己坐标与附近用户列表。
+    获取当前世界状态快照并合并未读事件。
+    包含自己坐标与附近用户列表 + inbox_unread.jsonl 中的所有未读事件。
 
-    返回示例：
+    返回：
       {
-        "me": {"user_id": 1, "name": "alice", "x": 10, "y": 20},
-        "nearby": [{"user_id": 2, "name": "bob", "x": 12, "y": 20}],
-        "updated_at": "2026-03-21T..."
+        "state": { ...world_state.json 完整内容... },
+        "unread": [ ...inbox_unread.jsonl 事件列表... ]
       }
     """
-    result = _get("/world")
-    if isinstance(result, dict):
-        return result
-    return {}
+    state_result = _get("/world")
+    state = state_result if isinstance(state_result, dict) else {}
+    events_result = _get("/events")
+    unread = events_result if isinstance(events_result, list) else []
+    return {"state": state, "unread": unread}
 
 
 def ws_ack(event_ids: list[int | str]) -> dict[str, Any]:
@@ -242,6 +242,54 @@ def ws_update_status(status: str) -> dict[str, Any]:
     return _post("/update_status", {"status": status})
 
 
+def ws_register(name: str, description: str = "", icon: str = "", base_url: str = "") -> dict[str, Any]:
+    """
+    直接调用服务端 /register，返回 token 和 user_id。
+    此函数不走 ws_client，直接 HTTP POST 到服务端。
+
+    参数：
+      name        — 龙虾名称（必填）
+      description — 简介（可选）
+      icon        — 头像 URL（可选）
+      base_url    — 服务端地址（可选，默认使用 config.json 中的地址）
+
+    返回：{"token": "...", "user_id": N} 或 {"error": "..."}
+    """
+    # 从 config.json 读取 base_url（ws_client 的 DATA_DIR 路径）
+    if not base_url:
+        data_dir = _resolve_data_dir()
+        config_path = data_dir / "config.json"
+        if config_path.exists():
+            try:
+                cfg = json.loads(config_path.read_text(encoding="utf-8"))
+                base_url = cfg.get("base_url", "")
+            except (json.JSONDecodeError, OSError):
+                pass
+        if not base_url:
+            return {"error": "未找到 base_url，请传入 --base-url 参数或确保 config.json 中有 base_url"}
+
+    url = base_url.rstrip("/") + "/register"
+    payload = json.dumps({
+        "name": name,
+        "description": description,
+        "icon": icon,
+        "status": "open",
+    }, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.URLError as e:
+        return {"error": f"连接失败：{e}"}
+    except json.JSONDecodeError as e:
+        return {"error": f"响应解析失败：{e}"}
+
+
 # ── CLI entry point (for Bash invocation) ──────────────────────────────
 
 def _main(argv: list[str] | None = None) -> None:
@@ -286,6 +334,12 @@ def _main(argv: list[str] | None = None) -> None:
     a = sub.add_parser("ack")
     a.add_argument("ids", help="逗号分隔的事件ID，如：1,2,3")
 
+    r = sub.add_parser("register")
+    r.add_argument("name", help="龙虾名称")
+    r.add_argument("--description", default="", help="简介（可选）")
+    r.add_argument("--icon", default="", help="头像 URL（可选）")
+    r.add_argument("--base-url", default="", help="服务端地址（可选）")
+
     args = parser.parse_args(argv)
 
     # 全局注入，供 _resolve_tool_port() 使用
@@ -318,6 +372,8 @@ def _main(argv: list[str] | None = None) -> None:
     elif args.cmd == "ack":
         ids = [i.strip() for i in args.ids.split(",")]
         result = ws_ack(ids)
+    elif args.cmd == "register":
+        result = ws_register(args.name, args.description, args.icon, args.base_url)
     else:
         result = {"error": f"未知命令：{args.cmd}"}
 
