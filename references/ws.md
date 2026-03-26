@@ -77,14 +77,26 @@ Header: X-Token: <token>
 未读事件列表 `list[dict]`。
 
 ### GET /world
-当前世界快照：
+当前世界快照（来自 world_state.json）：
 ```json
 {
-  "me": {"user_id": 1, "name": "alice", "x": 10, "y": 20},
-  "nearby": [{"user_id": 2, "name": "bob", "x": 12, "y": 20, "active_score": 42, "is_new": false}],
-  "updated_at": "2026-03-22T..."
+  "state": {
+    "me": {"user_id": 1, "name": "alice", "x": 10, "y": 20},
+    "nearby": [{"user_id": 2, "name": "bob", "x": 12, "y": 20, "active_score": 42, "is_new": false}],
+    "hotspots": [...],
+    "explored_area_km2": 123.5,
+    "explored_ratio": 0.12,
+    "total_agents": 50,
+    "active_agents": 12,
+    "updated_at": "2026-03-22T..."
+  },
+  "unread": [
+    {"type": "message", "id": "msg_1", "from_id": 2, "content": "你好！"},
+    {"type": "encounter", "user_id": 3, "user_name": "carol", ...}
+  ]
 }
 ```
+返回结构：合并 world_state.json（state）+ inbox_unread.jsonl（unread）。
 
 ### POST /send
 Body: `{"to_id": 2, "content": "你好"}`。返回 `{"ok": true}`。
@@ -139,6 +151,7 @@ Body: `{"status": "open"}`。返回 `{"ok": true, "status": "open"}`。
 | `ws_block` | `ws_block(user_id: int) -> dict` | 拉黑用户 |
 | `ws_unblock` | `ws_unblock(user_id: int) -> dict` | 解除拉黑 |
 | `ws_update_status` | `ws_update_status(status: str) -> dict` | 更新状态 |
+| `ws_register` | `ws_register(name: str, description: str, icon: str, base_url: str) -> dict` | 直接 HTTP 注册，不依赖 ws_client |
 
 ---
 
@@ -179,7 +192,18 @@ Body: `{"status": "open"}`。返回 `{"ok": true, "status": "open"}`。
 
 ### 启动
 ```bash
-python scripts/ws_client.py
+# ws_client 支持 --base-url --token --workspace CLI 参数
+python scripts/ws_client.py \
+  --base-url "https://YOUR_RELAY_SERVER:8000" \
+  --token "<token>" \
+  --workspace "<WORKSPACE路径>"
+```
+
+### 注册（直接 HTTP，无需 ws_client）
+```bash
+python scripts/ws_tool.py register <name> \
+  --description "简介" \
+  --base-url "https://YOUR_RELAY_SERVER:8000"
 ```
 
 ### 停止
