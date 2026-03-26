@@ -138,7 +138,7 @@ def read_unread_events() -> list[dict]:
     return events
 
 
-def clear_unread():
+def clear_all_unread():
     with open(INBOX_UNREAD_PATH, "w", encoding="utf-8") as f:
         f.write("")
 
@@ -225,26 +225,27 @@ def _on_ready(data: dict):
 
 
 def _on_snapshot(data: dict):
+    write_world_state(data)
     users = data.get("users", [])
     me = data.get("me", {})
     ts = data.get("ts", "")
-    radius = data.get("radius", 30)
-    state = {"me": me, "users": users, "radius": radius, "ts": ts}
-    write_world_state(state)
-    # 推送到未读列表
     for u in users:
         uid = u.get("user_id")
-        if uid and uid != me.get("user_id"):
-            evt = {
+        if uid and str(uid) != str(me.get("user_id")):
+            append_unread({
                 "type": "encounter",
                 "user_id": uid,
                 "user_name": u.get("name", ""),
                 "x": u.get("x"),
                 "y": u.get("y"),
                 "ts": ts,
-            }
-            append_unread(evt)
-            logger.info("遇到 #%s (%s) @(%s,%s)", uid, u.get("name"), u.get("x"), u.get("y"))
+            })
+            logger.info("遇到 #%s (%s)", uid, u.get("name"))
+
+
+def _on_step_context(data: dict):
+    """服务端推送 step_context 时直接覆盖写 world_state.json，保留所有字段。"""
+    write_world_state(data)
 
 
 def _on_message(data: dict):
@@ -312,10 +313,18 @@ def _run_http_server(port: int):
             elif parsed.path == "/ack":
                 ids_str = data.get("ids", "")
                 id_list = [i.strip() for i in ids_str.split(",") if i.strip()]
+                # 只移除指定ID，其余保留
+                remaining = []
                 for ev in read_unread_events():
-                    if str(ev.get("id", "")) in id_list:
-                        append_read(ev)
-                clear_unread()
+                    ev_id = str(ev.get("id", ""))
+                    if ev_id in id_list:
+                        append_read(ev)  # 移到已读
+                    else:
+                        remaining.append(json.dumps(ev, ensure_ascii=False) + "\n")
+                # 只写回未被 ack 的事件
+                with open(INBOX_UNREAD_PATH, "w", encoding="utf-8") as f:
+                    for line in remaining:
+                        f.write(line)
                 self._json({"ok": True})
             elif parsed.path == "/friends":
                 result = _sync_send_and_wait({"type": "get_friends"})
@@ -395,6 +404,8 @@ async def ws_connect(cfg: dict):
                         _on_ready(data)
                     elif t == "snapshot":
                         _on_snapshot(data)
+                    elif t == "step_context":
+                        _on_step_context(data)
                     elif t == "message":
                         _on_message(data)
                     else:
@@ -413,14 +424,13 @@ async def ws_connect(cfg: dict):
 # ── CLI ────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="ws_client")
+    parser = argparse.ArgumentParser(description="clawsocial ws_client")
+    parser.add_argument("--base-url", type=str, default="")
+    parser.add_argument("--token", type=str, default="")
+    parser.add_argument("--workspace", type=str, default=None)
     parser.add_argument(
         "--port", type=int, default=None,
         help="指定本地 HTTP 端口（默认自动分配空闲端口）",
-    )
-    parser.add_argument(
-        "--workspace", type=str, default=None,
-        help="Agent workspace 路径，ws_client 数据将写入 <workspace>/clawsocial/",
     )
     args = parser.parse_args()
 
@@ -440,7 +450,15 @@ def main():
     WS_CHANNEL_LOG_PATH = DATA_DIR / "ws_channel.log"
     PORT_FILE = DATA_DIR / "port.txt"
 
-    cfg = load_config()
+    # CLI 参数优先，写入 DATA_DIR/config.json 供 load_config 回退读取
+    if args.base_url and args.token:
+        (DATA_DIR / "config.json").write_text(
+            json.dumps({"base_url": args.base_url, "token": args.token}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        cfg = {"base_url": args.base_url, "token": args.token}
+    else:
+        cfg = load_config()
     port = resolve_port(args.port)
     save_port(port)
 
