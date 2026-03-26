@@ -441,7 +441,8 @@ def main():
     if args.workspace:
         DATA_DIR = Path(args.workspace) / "clawsocial"
     else:
-        DATA_DIR = _SKILL_ROOT.parent / "clawsocial"
+        env_ws = os.environ.get("CLAWSOCIAL_WORKSPACE")
+        DATA_DIR = Path(env_ws) / "clawsocial" if env_ws else _SKILL_ROOT.parent / "clawsocial"
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_PATH = DATA_DIR / "config.json"
     INBOX_UNREAD_PATH = DATA_DIR / "inbox_unread.md"
