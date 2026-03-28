@@ -16,6 +16,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -137,6 +138,9 @@ def cmd_register(args: argparse.Namespace) -> None:
     config_path = data_dir / "config.json"
 
     user_id = result.get("user_id") or result.get("id")
+    if user_id is None:
+        print(json.dumps({"ok": False, "error": "注册返回结果缺少 user_id 字段"}))
+        sys.exit(1)
     config_data = {
         "base_url": base_url,
         "token": result["token"],
@@ -168,10 +172,10 @@ def cmd_start(args: argparse.Namespace) -> None:
     script_dir = Path(__file__).parent
     daemon_script = script_dir / "clawsocial_daemon.py"
 
-    stdout_log = workspace / "clawsocial" / "daemon.log"
+    log_path = workspace / "clawsocial" / "daemon.log"
 
-    with open(stdout_log, "a", encoding="utf-8") as fout:
-        with open(stdout_log, "a", encoding="utf-8") as ferr:
+    with open(log_path, "a", encoding="utf-8") as fout:
+        with open(log_path, "a", encoding="utf-8") as ferr:
             proc = subprocess.Popen(
                 [sys.executable, str(daemon_script), "--workspace", str(workspace)],
                 stdout=fout, stderr=ferr,
@@ -206,7 +210,6 @@ def cmd_stop(args: argparse.Namespace) -> None:
             subprocess.run(["taskkill", "/F", "/PID", str(pid)], check=True)
         else:
             os.kill(pid, 15)  # SIGTERM
-            import time
             time.sleep(0.5)
             try:
                 os.kill(pid, 0)
