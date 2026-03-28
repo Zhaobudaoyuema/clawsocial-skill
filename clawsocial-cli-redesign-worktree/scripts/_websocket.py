@@ -45,7 +45,7 @@ class WebSocketClient:
         self._on_other = on_other
         self._send_queue: asyncio.Queue[dict] = asyncio.Queue()
         self._pending: dict[str, asyncio.Future[dict]] = {}
-        self._running = False
+        self._running = True
 
     # ── Public API ────────────────────────────────────────────
 
@@ -53,6 +53,14 @@ class WebSocketClient:
         """非阻塞写入发送队列（从 HTTP handler 调用）"""
         if self._running:
             self._send_queue.put_nowait(msg)
+
+    async def shutdown(self) -> None:
+        """Clean shutdown — stop accepting new messages and drain pending futures."""
+        self._running = False
+        for rid, fut in list(self._pending.items()):
+            if not fut.done():
+                fut.cancel()
+        self._pending.clear()
 
     async def send_and_wait(self, msg: dict, timeout: float = 30) -> dict:
         """请求-响应（带 request_id，等待服务端响应）"""
@@ -66,14 +74,22 @@ class WebSocketClient:
         except asyncio.TimeoutError:
             self._pending.pop(rid, None)
             return {"error": "timeout"}
+        except asyncio.CancelledError:
+            self._pending.pop(rid, None)
+            raise
 
     # ── Internal ────────────────────────────────────────────
 
     async def _ws_send_loop(self, ws) -> None:
         """从队列取消息发送"""
-        while True:
-            msg = await self._send_queue.get()
-            await ws.send(json.dumps(msg))
+        try:
+            while self._running:
+                msg = await self._send_queue.get()
+                if not self._running:
+                    break
+                await ws.send(json.dumps(msg))
+        except asyncio.CancelledError:
+            pass
 
     def _resolve_response(self, data: dict) -> None:
         """根据 request_id 找到 Future 并注入结果"""
@@ -99,13 +115,12 @@ class WebSocketClient:
         elif self._on_other:
             self._on_other(data)
 
-    async def run(self) -> None:
+    async def run(self, shutdown_event: asyncio.Event | None = None) -> None:
         """主循环：连接 → 保持 → 断开后指数退避重连"""
         from websockets.client import connect as ws_connect
         import _files
 
         backoff = 1
-        self._running = True
 
         while True:
             try:
@@ -121,6 +136,8 @@ class WebSocketClient:
 
                     # 接收循环
                     async for raw in ws:
+                        if shutdown_event is not None and shutdown_event.is_set():
+                            break
                         try:
                             data = json.loads(raw)
                             self._dispatch(data)
@@ -129,13 +146,14 @@ class WebSocketClient:
 
                     send_task.cancel()
 
+                    if shutdown_event is not None and shutdown_event.is_set():
+                        await self.shutdown()
+                        break
+
             except Exception as e:
-                import _files
                 _files.write_daemon_log(
                     self.workspace, "ERROR",
                     f"WebSocket disconnected: {e}. Reconnecting in {backoff}s..."
                 )
                 await asyncio.sleep(backoff)
                 backoff = min(backoff * 2, 60)
-
-        self._running = False
