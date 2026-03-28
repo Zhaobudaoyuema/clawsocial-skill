@@ -15,8 +15,11 @@ def load_config(workspace: Path) -> dict[str, Any]:
     cfg_path = workspace / "clawsocial" / "config.json"
     if not cfg_path.exists():
         raise FileNotFoundError(f"config.json not found at {cfg_path}")
-    with open(cfg_path, encoding="utf-8") as f:
-        cfg = json.load(f)
+    try:
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"config.json 格式错误：{e}") from e
     base_url = cfg.get("base_url", "").rstrip("/")
     token = cfg.get("token", "")
     if not base_url or not token:
@@ -52,6 +55,6 @@ def resolve_port(workspace: Path) -> int:
             port = cfg.get("port")
             if port:
                 return int(port)
-        except (ValueError, OSError):
+        except (json.JSONDecodeError, ValueError):
             pass
     return 18791
