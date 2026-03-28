@@ -24,6 +24,7 @@ class HTTPServer:
         self.port = port
         self.workspace = workspace
         self.ws_client = ws_client
+        self._shutdown_event = asyncio.Event()
         self._app = web.Application()
         self._setup_routes()
 
@@ -92,7 +93,11 @@ class HTTPServer:
         content = str(data.get("content", ""))
         if to_id is None:
             return self._json_response({"error": "missing to_id"}, status=400)
-        self.ws_client.put_send({"type": "send", "to_id": int(to_id), "content": content})
+        try:
+            to_id = int(to_id)
+        except (ValueError, TypeError):
+            return self._json_response({"error": "to_id must be an integer"}, status=400)
+        self.ws_client.put_send({"type": "send", "to_id": to_id, "content": content})
         _files.write_daemon_log(self.workspace, "DEBUG", f"SEND to_id={to_id}")
         return self._json_response({"ok": True})
 
@@ -103,7 +108,12 @@ class HTTPServer:
         y = data.get("y")
         if x is None or y is None:
             return self._json_response({"error": "missing x or y"}, status=400)
-        self.ws_client.put_send({"type": "move", "x": int(x), "y": int(y)})
+        try:
+            x = int(x)
+            y = int(y)
+        except (ValueError, TypeError):
+            return self._json_response({"error": "x and y must be integers"}, status=400)
+        self.ws_client.put_send({"type": "move", "x": x, "y": y})
         _files.write_daemon_log(self.workspace, "DEBUG", f"MOVE to ({x}, {y})")
         return self._json_response({"ok": True})
 
@@ -132,7 +142,11 @@ class HTTPServer:
         user_id = data.get("user_id")
         if user_id is None:
             return self._json_response({"error": "missing user_id"}, status=400)
-        result = await self.ws_client.send_and_wait({"type": "block", "user_id": int(user_id)})
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            return self._json_response({"error": "user_id must be an integer"}, status=400)
+        result = await self.ws_client.send_and_wait({"type": "block", "user_id": user_id})
         return self._json_response(result)
 
     async def _unblock(self, request: web.Request) -> web.Response:
@@ -140,7 +154,11 @@ class HTTPServer:
         user_id = data.get("user_id")
         if user_id is None:
             return self._json_response({"error": "missing user_id"}, status=400)
-        result = await self.ws_client.send_and_wait({"type": "unblock", "user_id": int(user_id)})
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            return self._json_response({"error": "user_id must be an integer"}, status=400)
+        result = await self.ws_client.send_and_wait({"type": "unblock", "user_id": user_id})
         return self._json_response(result)
 
     async def _update_status(self, request: web.Request) -> web.Response:
@@ -163,4 +181,8 @@ class HTTPServer:
             f"HTTP server started on {LOCAL_HOST}:{self.port}"
         )
         # 保持运行直到被取消
-        await asyncio.Event().wait()
+        await self._shutdown_event.wait()
+
+    def shutdown(self) -> None:
+        """Trigger server shutdown — called by daemon on SIGTERM."""
+        self._shutdown_event.set()
