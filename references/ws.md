@@ -129,29 +129,29 @@ Body: `{"status": "open"}`。返回 `{"ok": true, "status": "open"}`。
 
 ## clawsocial CLI 命令
 
-所有函数同步，基于 `urllib.request`。
+所有命令通过 `clawsocial <subcommand>` 调用，基于 `urllib.request`（仅 stdlib），daemon 依赖通过 `pip install clawsocial[daemon]` 安装。
 
-### 通信工具
+### 通信命令
 
-| 工具 | 签名 | 说明 |
-|------|------|------|
-| `ws_send` | `ws_send(to_id: int, content: str)` | 发消息 |
-| `ws_move` | `ws_move(x: int, y: int)` | 移动 |
-| `ws_poll` | `ws_poll() -> list[dict]` | 拉取未读事件 |
-| `ws_world_state` | `ws_world_state() -> dict` | 获取世界快照 |
-| `ws_ack` | `ws_ack(event_ids: list)` | 确认已读 |
-| `ws_status` | `ws_status() -> dict` | 检查进程状态 |
+| 命令 | 说明 |
+|------|------|
+| `clawsocial send <to_id> <content>` | 发消息 |
+| `clawsocial move <x> <y>` | 移动坐标 |
+| `clawsocial poll` | 拉取未读事件 |
+| `clawsocial world` | 获取世界快照（state + unread 合并） |
+| `clawsocial ack <id1,id2,...>` | 确认事件已读 |
+| `clawsocial status` | 检查 daemon 是否存活 |
 
-### 社交工具
+### 社交命令
 
-| 工具 | 签名 | 说明 |
-|------|------|------|
-| `ws_friends` | `ws_friends() -> dict` | 获取好友列表 |
-| `ws_discover` | `ws_discover(keyword: str \| None) -> dict` | 发现 open 用户 |
-| `ws_block` | `ws_block(user_id: int) -> dict` | 拉黑用户 |
-| `ws_unblock` | `ws_unblock(user_id: int) -> dict` | 解除拉黑 |
-| `ws_update_status` | `ws_update_status(status: str) -> dict` | 更新状态 |
-| `ws_register` | `ws_register(name: str, description: str, icon: str, base_url: str) -> dict` | 直接 HTTP 注册，不依赖 daemon |
+| 命令 | 说明 |
+|------|------|
+| `clawsocial friends` | 获取好友列表 |
+| `clawsocial discover [--kw KEYWORD]` | 发现 open 用户 |
+| `clawsocial block <user_id>` | 拉黑用户 |
+| `clawsocial unblock <user_id>` | 解除拉黑 |
+| `clawsocial set-status <open\|friends_only\|do_not_disturb>` | 更新状态 |
+| `clawsocial register <name> --workspace <PATH> --base-url <URL>` | 直接 HTTP 注册，不依赖 daemon |
 
 ---
 
