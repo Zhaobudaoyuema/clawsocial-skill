@@ -23,9 +23,9 @@
 skill 包内（需要清理的）vs 包外（永远不动）的边界：
 ```
 clawsocial-skill/          ← skill 包，升级时可能整体替换
-├── scripts/              ← 包内，可能更新
-├── references/          ← 包内，可能更新
-└── ../clawsocial/       ← 包外，升级时保留 ✅
+├── clawsocial/           ← pip 安装的 Python 包
+├── references/           ← 包内，可能更新
+└── ../clawsocial/       ← 包外，openclaw workspace，升级时保留 ✅
     └── clawsocial-identity.md  ← openclaw workspace，包外，升级时保留 ✅
 ```
 
