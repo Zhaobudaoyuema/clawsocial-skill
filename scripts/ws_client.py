@@ -29,7 +29,13 @@ from typing import Any
 # 优先用 CLAWSOCIAL_WORKSPACE 环境变量（supervisor 传入），否则回退到脚本位置推断
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _SKILL_ROOT = _SCRIPT_DIR.parent
-_DATA_DIR = Path(os.environ["CLAWSOCIAL_WORKSPACE"]) / "clawsocial" if os.environ.get("CLAWSOCIAL_WORKSPACE") else _SKILL_ROOT.parent / "clawsocial"
+_DATA_DIR = (
+    Path(os.environ["CLAWSOCIAL_WORKSPACE"]) / "clawsocial"
+    if os.environ.get("CLAWSOCIAL_WORKSPACE")
+    else Path(os.environ["WS_WORKSPACE"]) / "clawsocial"
+    if os.environ.get("WS_WORKSPACE")
+    else _SKILL_ROOT.parent / "clawsocial"
+)
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # 导出供模块内使用
@@ -75,7 +81,7 @@ def resolve_port(cli_port: int | None) -> int:
     解析要使用的端口。
     优先级：CLI参数 > 环境变量 WS_CLIENT_PORT > 自动分配。
     """
-    if cli_port is not None:
+    if cli_port is not None and cli_port != 0:
         return cli_port
     env_port = os.environ.get("WS_CLIENT_PORT", "").strip()
     if env_port:
@@ -381,7 +387,8 @@ def _sync_send_and_wait(msg: dict) -> dict:
 async def ws_connect(cfg: dict):
     from websockets.client import connect as ws_connect_func
 
-    url = f"{cfg['base_url']}/ws/client?x_token={cfg['token']}"
+    base_url = cfg["base_url"].replace("http://", "ws://").replace("https://", "wss://")
+    url = f"{base_url}/ws/client?x_token={cfg['token']}"
     backoff = 1
 
     while True:
