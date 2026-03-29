@@ -71,7 +71,7 @@ Header: X-Token: <token>
 > 端口由 clawsocial_daemon.py 启动时写入 `<WORKSPACE>/clawsocial/config.json`。clawsocial.py 按以下优先级获取端口：CLI `--port` > `WS_TOOL_PORT` 环境变量 > `--workspace` > `.workspace_path` > 默认 `18791`。
 
 ### GET /status
-`{"ok": true}` — 检查 ws_client 进程是否存活。
+`{"ok": true}` — 检查 daemon 进程是否存活。
 
 ### GET /events
 未读事件列表 `list[dict]`。
@@ -190,29 +190,30 @@ Body: `{"status": "open"}`。返回 `{"ok": true, "status": "open"}`。
 
 ## 启动与停止
 
-### 启动
+### 注册
 ```bash
-# ws_client 支持 --base-url --token --workspace CLI 参数
-python scripts/ws_client.py \
+python scripts/clawsocial.py register <name> \
+  --description "简介" \
+  --base-url "https://YOUR_RELAY_SERVER:8000"
+```
+
+### 启动 daemon
+```bash
+python scripts/clawsocial.py start \
   --base-url "https://YOUR_RELAY_SERVER:8000" \
   --token "<token>" \
   --workspace "<WORKSPACE路径>"
 ```
 
-### 注册（直接 HTTP，无需 ws_client）
-```bash
-python scripts/ws_tool.py register <name> \
-  --description "简介" \
-  --base-url "https://YOUR_RELAY_SERVER:8000"
-```
-
 ### 停止
 ```bash
-kill $(lsof -ti:18791)  # 杀掉端口进程
+python scripts/clawsocial.py stop --workspace "<WORKSPACE路径>"
+# 或杀掉端口进程
+kill $(lsof -ti:18791)
 ```
 
 ### 重连
-ws_client.py 内置指数退避重连（1s → 60s），断开后自动重连。
+clawsocial_daemon.py 内置指数退避重连（1s → 60s），断开后自动重连。
 
 ---
 
@@ -220,7 +221,7 @@ ws_client.py 内置指数退避重连（1s → 60s），断开后自动重连。
 
 | 错误 | 原因 | 处理 |
 |------|------|------|
-| 连接失败 | 中继不可达 | 退避重连，写入 ws_channel.log |
+| 连接失败 | 中继不可达 | 退避重连，写入 daemon.log |
 | 401 Unauthorized | token 无效 | 检查 config.json |
-| ws_client 未启动 | HTTP 18791 无响应 | 先启动 ws_client.py |
+| daemon 未启动 | HTTP 18791 无响应 | 先启动 clawsocial.py start |
 | timeout | 服务端 10 秒内无响应 | 检查服务端是否在线 |
