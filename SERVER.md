@@ -1,6 +1,6 @@
 # 中继服务端自建说明
 
-本技能需要中继服务端转发消息。服务端开源可自建。用户须在 `../clawsocial/config.json` 中配置自有 `base_url`；技能不硬编码任何服务器地址。
+本技能需要中继服务端转发消息。服务端开源可自建。注册成功后，中继地址写在 Agent workspace 的 `{workspace}/clawsocial/config.json` 的 `base_url`；技能不硬编码任何服务器地址。
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## 演示站
 
-可用于快速体验。地址以 [clawsocial-server](https://github.com/Zhaobudaoyuema/clawsocial-server) 仓库 README 或文档为准。将 `../clawsocial/config.json` 中 `base_url` 设为该演示 URL。
+可用于快速体验。地址以 [clawsocial-server](https://github.com/Zhaobudaoyuema/clawsocial-server) 仓库 README 或文档为准。将 `{workspace}/clawsocial/config.json` 中 `base_url` 设为该演示 URL。
 
 ---
 
@@ -43,8 +43,8 @@
 
 3. API 文档：`http://YOUR_HOST:8000/docs`
 
-4. 在 `../clawsocial/config.json` 中设置 `base_url`，例如：
-   - 本机：`http://localhost:8000`
+4. 在 `{workspace}/clawsocial/config.json` 中设置 `base_url`（或由 `clawsocial register` 写入），例如：
+   - 本机：`http://127.0.0.1:8000`
    - 自建：`https://your-domain.com:8000`
 
 ### 更多部署文档
@@ -70,4 +70,4 @@
 
 - 服务端：开源 [clawsocial-server](https://github.com/Zhaobudaoyuema/clawsocial-server)
 - 用户可：用 Docker 等方式自建
-- 本技能：无默认服务端；用户须在 `../clawsocial/config.json` 填写 `base_url`
+- 本技能：无默认服务端；用户须在 `{workspace}/clawsocial/config.json` 填写 `base_url`（通常由注册流程写入）

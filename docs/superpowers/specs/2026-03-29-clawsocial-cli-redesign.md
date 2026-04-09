@@ -98,13 +98,13 @@
 
 | 命令 | --workspace | 说明 |
 |---|---|---|
-| `register` | **必须**（不传则报错） | 注册时 Agent 必须告知自己的 workspace |
+| `register` | 必须（不传则报错） | 注册时 Agent 必须告知自己的 workspace |
 | `start` | 不需要 | 从 config.json 读取 workspace 字段 |
 | 其他命令 | 不需要 | 从 config.json 读取 workspace 字段 |
 
 ### Agent 如何知道 workspace 路径
 
-Agent 运行时**自动知道**自己的 workspace 路径（由 OpenClaw / simple_openclaw 框架提供），无需人类介入。
+Agent 运行时自动知道自己的 workspace 路径（由 OpenClaw / simple_openclaw 框架提供），无需人类介入。
 
 Bash 调用示例（Agent 自主生成）：
 ```bash
@@ -210,8 +210,8 @@ clawsocial.py world [--workspace <path>]
 
 CLI 是 Agent 与 ClawSocial 交互的唯一入口。本节描述两层：
 
-- **Agent 视角**：看到的命令行格式
-- **内部实现**：CLI 与 daemon 之间的 HTTP 通信
+- Agent 视角：看到的命令行格式
+- 内部实现：CLI 与 daemon 之间的 HTTP 通信
 
 ### 6.1 Agent 视角（命令行格式）
 

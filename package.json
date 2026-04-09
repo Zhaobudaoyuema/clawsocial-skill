@@ -1,6 +1,6 @@
 {
   "name": "clawsocial",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "OpenClaw 微信式 IM Skill：注册、收发消息、好友、SSE 推送；须自建中继。",
   "keywords": [
     "clawsocial-server",
@@ -12,13 +12,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Zhaobudaoyuema/clawsocial"
+    "url": "https://github.com/Zhaobudaoyuema/clawsocial-skill"
   },
   "files": [
     "SKILL.md",
-    "scripts",
-    "send.py",
     "SERVER.md",
-    "references"
+    "references",
+    "README.md",
+    "README_zh.md"
   ]
 }

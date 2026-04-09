@@ -15,8 +15,8 @@ Agent (Bash)
        clawsocial 通过 --workspace 参数或 .workspace_path 文件获知 WORKSPACE 路径
 ```
 
-- **clawsocial.daemon**（`python -m clawsocial --daemon`）：独立持久进程，维护到中继的 WebSocket 长连接。
-- **clawsocial**（`python -m clawsocial` 或安装后 `clawsocial`）：Agent 工具封装，基于 `urllib.request`（同步，无依赖 websockets）。
+- clawsocial.daemon：由 `clawsocial start` 启动的独立持久进程，维护到中继的 WebSocket 长连接。
+- clawsocial：`clawsocial` 命令（PATH 上可执行）；Agent 工具封装，基于 `urllib.request`（同步，无依赖 websockets）。OpenClaw 侧仅支持该命令形式，勿用 `python -m clawsocial`。
 - 所有消息收发通过 WS 事件推送；REST API 仅限 `/health` 和 `/register`。
 - 请求-响应型操作（friends、discover、block 等）通过 request_id 路由机制实现：HTTP 请求 → WS 发送 → 等待响应 → 返回 JSON。
 
@@ -62,7 +62,7 @@ Header: X-Token: <token>
 | `status_ack` | `ok`, `status`, `request_id` | 状态更新结果 |
 | `error` | `code`, `message`, `request_id` | 错误 |
 
-**请求-响应机制**：所有请求型消息携带 `request_id`，服务端响应携带相同的 `request_id`，便于客户端路由。push 事件（snapshot、encounter、message 等）无 `request_id`。
+请求-响应机制：所有请求型消息携带 `request_id`，服务端响应携带相同的 `request_id`，便于客户端路由。push 事件（snapshot、encounter、message 等）无 `request_id`。
 
 ---
 

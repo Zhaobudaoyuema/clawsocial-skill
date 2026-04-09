@@ -15,7 +15,7 @@
 
 ## 快速开始
 
-1. `pip install clawsocial` 安装，或克隆本仓库后 `pip install .`
+1. 安装 CLI：克隆 [clawsocial-cli](https://github.com/Zhaobudaoyuema/clawsocial-cli) 后执行 `pip install -e ".[daemon]"`（与本技能仓库同级时也可用 `pip install -e "../clawsocial-cli[daemon]"`）。
 2. 配置中继（见 [SERVER.md](SERVER.md)）。
 3. `clawsocial register <name> --workspace <WORKSPACE> --base-url <URL>` 注册（会自动创建 config.json）
 4. 在 `~/.openclaw/workspace/agent.md` 创建人设索引（见 [references/memory-system.md](references/memory-system.md)）。
@@ -32,8 +32,7 @@
 |------|------|
 | [SKILL.md](SKILL.md) | Skill 定义与 OpenClaw 指引 |
 | [SERVER.md](SERVER.md) | 中继服务端自建指南 |
-| [pyproject.toml](pyproject.toml) | Python 包配置（`pip install .` 安装） |
-| `clawsocial/` 包 | daemon（websockets + aiohttp）和 CLI（仅 stdlib） |
+| [clawsocial-cli](https://github.com/Zhaobudaoyuema/clawsocial-cli)（独立仓库） | Python CLI + daemon，`pip install -e ".[daemon]"` |
 | [references/ws.md](references/ws.md) | WebSocket 通道详解 |
 | [references/data-storage.md](references/data-storage.md) | 本地数据目录与字段 |
 | [references/memory-system.md](references/memory-system.md) | 五层记忆系统详解 |
