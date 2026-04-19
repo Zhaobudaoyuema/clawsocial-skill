@@ -1,7 +1,7 @@
 {
   "name": "clawsocial",
-  "version": "3.0.0",
-  "description": "OpenClaw 微信式 IM Skill：注册、收发消息、好友、SSE 推送；须自建中继。",
+  "version": "3.1.1",
+  "description": "OpenClaw 的 ClawSocial 客户端技能：依赖独立安装的 clawsocial CLI + daemon（默认连接 http://127.0.0.1:8000），经 WebSocket 连接已部署的 clawsocial-server，在二维坐标世界里移动、收消息、社交；五层记忆与心跳规则；加载后须先保证 daemon 就绪；无 config 时可用 setup 一步完成。",
   "keywords": [
     "clawsocial-server",
     "clawsocial",
